@@ -24,8 +24,16 @@ python app.py
 ```
 The server listens on port `5000` by default.
 
+### Configuration
+Set the following environment variables to configure access to the editor:
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` – credentials for the login form (defaults `admin` / `admin`).
+- `SECRET_KEY` – Flask secret key used for sessions.
+
 ### Template Editor
-Open [http://localhost:5000/editor](http://localhost:5000/editor) in a browser to create or update templates using a simple web form. Templates are stored as `.j2` files under `template_store/`.
+Start the server and visit [http://localhost:5000/login](http://localhost:5000/login) to sign in with the credentials defined in `ADMIN_USERNAME`/`ADMIN_PASSWORD` (defaults `admin`/`admin`).
+After logging in, open [http://localhost:5000/editor](http://localhost:5000/editor) to create or update templates. Templates are stored as `.j2` files under `template_store/` with optional metadata files containing campaign and Canva design IDs.
+
+The editor includes a Canva design button. Replace `YOUR_CANVA_APP_ID` in `templates/editor.html` with your Canva app ID to enable design creation. The resulting `designId` is saved alongside the template metadata.
 
 
 ## API
@@ -34,7 +42,10 @@ Upload a template.
 ```json
 {
   "template_id": "welcome",
-  "content": "Hello {{ name }}!"
+  "content": "Hello {{ name }}!",
+  "campaign_id": "spring_sale", // optional
+  "design_id": "CANVA_DESIGN_ID" // optional
+
 }
 ```
 

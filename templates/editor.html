@@ -4,31 +4,47 @@
   <meta charset="utf-8">
   <title>Template Editor</title>
 </head>
-<body>
-  <h1>Create Template</h1>
-  <form id="template-form">
-    <label>Template ID: <input type="text" id="template_id" required></label><br>
-    <label>Content:</label><br>
-    <textarea id="content" rows="10" cols="50" required></textarea><br>
-    <button type="submit">Save</button>
-  </form>
-  <p id="status"></p>
-  <script>
-    document.getElementById('template-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const template_id = document.getElementById('template_id').value;
-      const content = document.getElementById('content').value;
-      const resp = await fetch('/template', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({template_id, content})
+  <body>
+    <h1>Create Template</h1>
+    <form id="template-form">
+      <label>Template ID: <input type="text" id="template_id" required></label><br>
+      <label>Campaign ID: <input type="text" id="campaign_id"></label><br>
+      <input type="hidden" id="design_id">
+      <button type="button" id="canva-btn">Design in Canva</button><br><br>
+      <label>Content:</label><br>
+      <textarea id="content" rows="10" cols="50" required></textarea><br>
+      <button type="submit">Save</button>
+    </form>
+    <p id="status"></p>
+    <script src="https://sdk.canva.com/design-embed/v1.js"></script>
+    <script>
+      Canva.DesignButton.initialize({
+        appId: 'YOUR_CANVA_APP_ID'
       });
-      if (resp.ok) {
-        document.getElementById('status').textContent = 'Saved!';
-      } else {
-        document.getElementById('status').textContent = 'Error saving template';
-      }
-    });
-  </script>
-</body>
+      Canva.DesignButton.create({
+        button: document.getElementById('canva-btn'),
+        onDesignPublish: (design) => {
+          document.getElementById('design_id').value = design.designId;
+        }
+      });
+
+      document.getElementById('template-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const template_id = document.getElementById('template_id').value;
+        const campaign_id = document.getElementById('campaign_id').value;
+        const design_id = document.getElementById('design_id').value;
+        const content = document.getElementById('content').value;
+        const resp = await fetch('/template', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, campaign_id, design_id, content})
+        });
+        if (resp.ok) {
+          document.getElementById('status').textContent = 'Saved!';
+        } else {
+          document.getElementById('status').textContent = 'Error saving template';
+        }
+      });
+    </script>
+  </body>
 </html>

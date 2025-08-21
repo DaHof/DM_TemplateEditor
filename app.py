@@ -1,22 +1,60 @@
 import os
-from flask import Flask, request, jsonify, render_template
+
+import json
+from functools import wraps
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    render_template,
+    session,
+    redirect,
+    url_for,
+)
+
 from jinja2 import Template
 import requests
 
 app = Flask(__name__)
+
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
+
 
 # store user-defined Jinja templates separately from Flask's template folder
 USER_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'template_store')
 os.makedirs(USER_TEMPLATE_DIR, exist_ok=True)
 
 
-def save_template(template_id: str, content: str) -> str:
-    """Save a template file to disk and return its path."""
-    path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
 
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def save_template(
+    template_id: str, content: str, campaign_id: str | None = None, design_id: str | None = None
+) -> str:
+    """Save a template file and optional metadata to disk and return its path."""
+    path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
-    return path
+
+    metadata = {}
+    if campaign_id:
+        metadata["campaign_id"] = campaign_id
+    if design_id:
+        metadata["design_id"] = design_id
+    if metadata:
+        meta_path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.json")
+        with open(meta_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f)
+te(content)
 
 
 def load_template(template_id: str) -> Template:
@@ -33,14 +71,36 @@ def upload_template():
     data = request.get_json(force=True)
     template_id = data['template_id']
     content = data['content']
-    save_template(template_id, content)
+    campaign_id = data.get('campaign_id')
+    design_id = data.get('design_id')
+    save_template(template_id, content, campaign_id, design_id)
     return jsonify({'status': 'saved'}), 201
 
+
 @app.route('/editor')
+@login_required
+
 def editor_page():
     """Simple web page to create templates."""
     return render_template('editor.html')
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('editor_page'))
+        return render_template('login.html', error='Invalid credentials')
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 
 def _render(template: Template, record: dict) -> str:
