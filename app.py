@@ -1,17 +1,19 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from jinja2 import Template
 import requests
 
 app = Flask(__name__)
 
-TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
-os.makedirs(TEMPLATE_DIR, exist_ok=True)
+# store user-defined Jinja templates separately from Flask's template folder
+USER_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'template_store')
+os.makedirs(USER_TEMPLATE_DIR, exist_ok=True)
 
 
 def save_template(template_id: str, content: str) -> str:
     """Save a template file to disk and return its path."""
-    path = os.path.join(TEMPLATE_DIR, f"{template_id}.j2")
+    path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
     return path
@@ -19,7 +21,8 @@ def save_template(template_id: str, content: str) -> str:
 
 def load_template(template_id: str) -> Template:
     """Load a template by id."""
-    path = os.path.join(TEMPLATE_DIR, f"{template_id}.j2")
+    path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, encoding='utf-8') as f:
         return Template(f.read())
 
@@ -32,6 +35,12 @@ def upload_template():
     content = data['content']
     save_template(template_id, content)
     return jsonify({'status': 'saved'}), 201
+
+@app.route('/editor')
+def editor_page():
+    """Simple web page to create templates."""
+    return render_template('editor.html')
+
 
 
 def _render(template: Template, record: dict) -> str:
