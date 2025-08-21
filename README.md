@@ -46,7 +46,6 @@ Upload a template.
   "content": "Hello {{ name }}!",
   "campaign_id": "spring_sale", // optional
   "design_id": "CANVA_DESIGN_ID" // optional
-
 }
 ```
 

@@ -17,14 +17,12 @@
     </form>
     <p id="status"></p>
 
-
     <h2>Test Template</h2>
     <label>Sample Record JSON:</label><br>
     <textarea id="record_json" rows="5" cols="50">{ "name": "Alice" }</textarea><br>
     <button type="button" id="test-render">Test Render</button>
     <button type="button" id="test-batch">Test Batch</button>
     <pre id="output"></pre>
-
     <script src="https://sdk.canva.com/design-embed/v1.js"></script>
     <script>
       Canva.DesignButton.initialize({
@@ -54,7 +52,6 @@
           document.getElementById('status').textContent = 'Error saving template';
         }
       });
-
 
       function getRecord() {
         try {
