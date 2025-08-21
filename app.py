@@ -1,4 +1,5 @@
 import os
+
 import json
 from functools import wraps
 from flask import (
@@ -10,17 +11,21 @@ from flask import (
     redirect,
     url_for,
 )
+
 from jinja2 import Template
 import requests
 
 app = Flask(__name__)
+
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
 
+
 # store user-defined Jinja templates separately from Flask's template folder
 USER_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'template_store')
 os.makedirs(USER_TEMPLATE_DIR, exist_ok=True)
+
 
 
 def login_required(func):
@@ -49,12 +54,13 @@ def save_template(
         meta_path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.json")
         with open(meta_path, 'w', encoding='utf-8') as f:
             json.dump(metadata, f)
-    return path
+te(content)
 
 
 def load_template(template_id: str) -> Template:
     """Load a template by id."""
     path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, encoding='utf-8') as f:
         return Template(f.read())
 
@@ -73,6 +79,7 @@ def upload_template():
 
 @app.route('/editor')
 @login_required
+
 def editor_page():
     """Simple web page to create templates."""
     return render_template('editor.html')
