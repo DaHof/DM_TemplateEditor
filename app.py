@@ -52,9 +52,11 @@ def save_template(
     return path
 
 
+
 def load_template(template_id: str) -> Template:
     """Load a template by id."""
     path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, encoding='utf-8') as f:
         return Template(f.read())
 
@@ -73,6 +75,7 @@ def upload_template():
 
 @app.route('/editor')
 @login_required
+
 def editor_page():
     """Simple web page to create templates."""
     return render_template('editor.html')
