@@ -35,6 +35,7 @@ After logging in, open [http://localhost:5000/editor](http://localhost:5000/edit
 
 The editor includes a Canva design button. Replace `YOUR_CANVA_APP_ID` in `templates/editor.html` with your Canva app ID to enable design creation. The resulting `designId` is saved alongside the template metadata.
 
+The page also provides **Test Render** and **Test Batch** buttons. Enter sample record JSON and click a button to preview how the template renders for a single record or a small batch directly in the browser.
 
 ## API
 ### `POST /template`
@@ -50,7 +51,6 @@ Upload a template.
 ```
 
 Templates saved through the editor use this same endpoint behind the scenes.
-
 
 ### `POST /render`
 Render a single record.

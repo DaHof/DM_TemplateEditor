@@ -16,6 +16,15 @@
       <button type="submit">Save</button>
     </form>
     <p id="status"></p>
+
+
+    <h2>Test Template</h2>
+    <label>Sample Record JSON:</label><br>
+    <textarea id="record_json" rows="5" cols="50">{ "name": "Alice" }</textarea><br>
+    <button type="button" id="test-render">Test Render</button>
+    <button type="button" id="test-batch">Test Batch</button>
+    <pre id="output"></pre>
+
     <script src="https://sdk.canva.com/design-embed/v1.js"></script>
     <script>
       Canva.DesignButton.initialize({
@@ -45,6 +54,43 @@
           document.getElementById('status').textContent = 'Error saving template';
         }
       });
+
+
+      function getRecord() {
+        try {
+          return JSON.parse(document.getElementById('record_json').value);
+        } catch (err) {
+          document.getElementById('output').textContent = 'Invalid JSON';
+          return null;
+        }
+      }
+
+      document.getElementById('test-render').addEventListener('click', async function() {
+        const template_id = document.getElementById('template_id').value;
+        const record = getRecord();
+        if (!record) return;
+        const resp = await fetch('/render', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, record})
+        });
+        const data = await resp.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      });
+
+      document.getElementById('test-batch').addEventListener('click', async function() {
+        const template_id = document.getElementById('template_id').value;
+        const record = getRecord();
+        if (!record) return;
+        const resp = await fetch('/batch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, records: [record, record]})
+        });
+        const data = await resp.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      });
+
     </script>
   </body>
 </html>
