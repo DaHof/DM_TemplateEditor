@@ -13,6 +13,7 @@ os.makedirs(USER_TEMPLATE_DIR, exist_ok=True)
 def save_template(template_id: str, content: str) -> str:
     """Save a template file to disk and return its path."""
     path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
     return path
@@ -21,6 +22,7 @@ def save_template(template_id: str, content: str) -> str:
 def load_template(template_id: str) -> Template:
     """Load a template by id."""
     path = os.path.join(USER_TEMPLATE_DIR, f"{template_id}.j2")
+
     with open(path, encoding='utf-8') as f:
         return Template(f.read())
 
@@ -34,11 +36,11 @@ def upload_template():
     save_template(template_id, content)
     return jsonify({'status': 'saved'}), 201
 
-
 @app.route('/editor')
 def editor_page():
     """Simple web page to create templates."""
     return render_template('editor.html')
+
 
 
 def _render(template: Template, record: dict) -> str:

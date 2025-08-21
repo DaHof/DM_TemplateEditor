@@ -27,6 +27,7 @@ The server listens on port `5000` by default.
 ### Template Editor
 Open [http://localhost:5000/editor](http://localhost:5000/editor) in a browser to create or update templates using a simple web form. Templates are stored as `.j2` files under `template_store/`.
 
+
 ## API
 ### `POST /template`
 Upload a template.
@@ -38,6 +39,7 @@ Upload a template.
 ```
 
 Templates saved through the editor use this same endpoint behind the scenes.
+
 
 ### `POST /render`
 Render a single record.
