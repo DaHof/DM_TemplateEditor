@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Template Editor</title>
+</head>
+  <body>
+    <h1>Create Template</h1>
+    <form id="template-form">
+      <label>Template ID: <input type="text" id="template_id" required></label><br>
+      <label>Campaign ID: <input type="text" id="campaign_id"></label><br>
+      <input type="hidden" id="design_id">
+      <button type="button" id="canva-btn">Design in Canva</button><br><br>
+      <label>Content:</label><br>
+      <textarea id="content" rows="10" cols="50" required></textarea><br>
+      <button type="submit">Save</button>
+    </form>
+    <p id="status"></p>
+
+    <h2>Test Template</h2>
+    <label>Sample Record JSON:</label><br>
+    <textarea id="record_json" rows="5" cols="50">{ "name": "Alice" }</textarea><br>
+    <button type="button" id="test-render">Test Render</button>
+    <button type="button" id="test-batch">Test Batch</button>
+    <pre id="output"></pre>
+    <script src="https://sdk.canva.com/design-embed/v1.js"></script>
+    <script>
+      Canva.DesignButton.initialize({
+        appId: 'YOUR_CANVA_APP_ID'
+      });
+      Canva.DesignButton.create({
+        button: document.getElementById('canva-btn'),
+        onDesignPublish: (design) => {
+          document.getElementById('design_id').value = design.designId;
+        }
+      });
+
+      document.getElementById('template-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const template_id = document.getElementById('template_id').value;
+        const campaign_id = document.getElementById('campaign_id').value;
+        const design_id = document.getElementById('design_id').value;
+        const content = document.getElementById('content').value;
+        const resp = await fetch('/template', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, campaign_id, design_id, content})
+        });
+        if (resp.ok) {
+          document.getElementById('status').textContent = 'Saved!';
+        } else {
+          document.getElementById('status').textContent = 'Error saving template';
+        }
+      });
+
+      function getRecord() {
+        try {
+          return JSON.parse(document.getElementById('record_json').value);
+        } catch (err) {
+          document.getElementById('output').textContent = 'Invalid JSON';
+          return null;
+        }
+      }
+
+      document.getElementById('test-render').addEventListener('click', async function() {
+        const template_id = document.getElementById('template_id').value;
+        const record = getRecord();
+        if (!record) return;
+        const resp = await fetch('/render', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, record})
+        });
+        const data = await resp.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      });
+
+      document.getElementById('test-batch').addEventListener('click', async function() {
+        const template_id = document.getElementById('template_id').value;
+        const record = getRecord();
+        if (!record) return;
+        const resp = await fetch('/batch', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({template_id, records: [record, record]})
+        });
+        const data = await resp.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      });
+    </script>
+  </body>
+</html>
